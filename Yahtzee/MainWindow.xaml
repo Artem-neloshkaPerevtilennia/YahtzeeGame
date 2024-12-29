@@ -6,7 +6,19 @@
         xmlns:local="clr-namespace:Yahtzee"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
 
-    </Grid>
+	<Window.Resources>
+		<Style TargetType="TextBlock">
+			<Setter Property="TextWrapping" Value="Wrap" />
+			<Setter Property="TextAlignment" Value="Center" />
+		</Style>
+		
+		<Style TargetType="TextBox">
+			<Setter Property="Height" Value="20" />
+		</Style>
+	</Window.Resources>
+	
+	<Grid>
+		
+	</Grid>
 </Window>
