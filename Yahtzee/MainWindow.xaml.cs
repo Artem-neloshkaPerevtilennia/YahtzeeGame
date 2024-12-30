@@ -153,13 +153,20 @@ public partial class MainWindow : Window
 		{
 			AddCell(yahtzeeGrid, upperSection[i], 2 + i, isLeftPlayer ? 0 : 2, 1);
 			AddCell(yahtzeeGrid, upperSectionDescription[i], 2 + i, 1, 1);
-			if (i < upperSection.Length - 1)
+			if (isLeftPlayer)
 			{
-				AddCellWithUseButton(yahtzeeGrid, i + 2, isLeftPlayer ? 2 : 0);
+				AddCell(yahtzeeGrid, "0", 2 + i, 2, 1, borderColor: Colors.White);
 			}
 			else
 			{
-				AddCell(yahtzeeGrid, "0", 2 + i, isLeftPlayer ? 2 : 0, 1, borderColor: Colors.White);
+				if (i < upperSection.Length - 1)
+				{
+					AddCellWithUseButton(yahtzeeGrid, i + 2, 0);
+				}
+				else
+				{
+					AddCell(yahtzeeGrid, "0", 2 + i, 0, 1, borderColor: Colors.White);
+				}
 			}
 		}
 
@@ -178,13 +185,20 @@ public partial class MainWindow : Window
 		{
 			AddCell(yahtzeeGrid, lowerSection[i], 10 + i, isLeftPlayer ? 0 : 2, 1);
 			AddCell(yahtzeeGrid, lowerSectionDescription[i], 10 + i, 1, 1);
-			if (i < lowerSection.Length - 2)
+			if (isLeftPlayer)
 			{
-				AddCellWithUseButton(yahtzeeGrid, i + 10, isLeftPlayer ? 2 : 0);
+				AddCell(yahtzeeGrid, "0", 10 + i, 2, 1, borderColor: Colors.White);
 			}
 			else
 			{
-				AddCell(yahtzeeGrid, "0", 10 + i, isLeftPlayer ? 2 : 0, 1, borderColor: Colors.White);
+				if (i < lowerSection.Length - 2)
+				{
+					AddCellWithUseButton(yahtzeeGrid, i + 10, 0);
+				}
+				else
+				{
+					AddCell(yahtzeeGrid, "0", 10 + i, 0, 1, borderColor: Colors.White);
+				}
 			}
 		}
 
@@ -199,12 +213,12 @@ public partial class MainWindow : Window
 			Background = new SolidColorBrush(Colors.LightGray)
 		};
 
-		for (int i = 0; i < 1; i++) // Один рядок
+		for (int i = 0; i < 1; i++)
 		{
 			squaresGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 		}
 
-		for (int j = 0; j < 5; j++) // П'ять колонок
+		for (int j = 0; j < 5; j++)
 		{
 			squaresGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 		}
@@ -213,13 +227,20 @@ public partial class MainWindow : Window
 		{
 			Button square = new Button
 			{
-				Background = new SolidColorBrush(Colors.White),
+				Background = new SolidColorBrush(isLeftPlayer ? Colors.White : Colors.Yellow),
 				BorderBrush = new SolidColorBrush(Colors.Black),
 				BorderThickness = new Thickness(1),
 				Margin = new Thickness(2),
 				Tag = 0
 			};
-			square.Click += (s, e) => ToggleDiceSelection(square);
+			if (isLeftPlayer)
+			{
+				square.Click += (s, e) => ToggleDiceSelectionBot();
+			}
+			else
+			{
+				square.Click += (s, e) => ToggleDiceSelection(square);
+			}
 
 			Grid.SetRow(square, 0);
 			Grid.SetColumn(square, j);
@@ -241,6 +262,10 @@ public partial class MainWindow : Window
 		return squaresGrid;
 	}
 
+	private void ToggleDiceSelectionBot()
+	{
+	}
+
 	private void RollDiceButton_Click(object sender, RoutedEventArgs e)
 	{
 		if (rollCount < 3)
@@ -250,7 +275,6 @@ public partial class MainWindow : Window
 				Button square = dice.Key;
 				SolidColorBrush currentBackground = square.Background as SolidColorBrush;
 
-				// Кидаємо тільки вибрані кубики
 				if (currentBackground != null && currentBackground.Color == Colors.Yellow)
 				{
 					rightDice[square] = RollSingleDice();
@@ -259,13 +283,10 @@ public partial class MainWindow : Window
 			}
 
 			rollCount++;
-
-			if (rollCount == 3)
-			{
-				MessageBox.Show("Ваш хід закінчився! Перехід до бота.");
-				rollCount = 0;
-				BotTurn();
-			}
+		}
+		else
+		{
+			MessageBox.Show("Нізя більше кидати, потяг поїхав, обирай куди очки записувати, голова");
 		}
 	}
 
@@ -344,11 +365,7 @@ public partial class MainWindow : Window
 			VerticalAlignment = VerticalAlignment.Center,
 			Margin = new Thickness(2)
 		};
-		useButton.Click += (s, e) =>
-		{
-			CalculateScore(useButton);
-			BotTurn();
-		};
+		useButton.Click += (s, e) => { CalculateScore(useButton); };
 
 		Grid.SetRow(useButton, row);
 		Grid.SetColumn(useButton, column);
@@ -357,6 +374,14 @@ public partial class MainWindow : Window
 
 	private void CalculateScore(Button useButton)
 	{
+		if (rollCount == 0)
+		{
+			MessageBox.Show("Що ти додати хочеш? Ти ще навіть кидку не зробив");
+			return;
+		}
+
+		rollCount = 0;
+
 		Grid parentGrid = useButton.Parent as Grid;
 		if (parentGrid != null)
 		{
@@ -408,7 +433,6 @@ public partial class MainWindow : Window
 					{
 						if (dice.Value == 5)
 							score += dice.Value;
-						;
 					}
 
 					break;
@@ -561,7 +585,7 @@ public partial class MainWindow : Window
 					Margin = new Thickness(2)
 				};
 				border.Child = updatedScoreText;
-				
+
 				Grid.SetRow(border, 8);
 				Grid.SetColumn(border, 0);
 				parentGrid.Children.Add(border);
@@ -588,23 +612,23 @@ public partial class MainWindow : Window
 					Margin = new Thickness(2)
 				};
 				border.Child = updatedScoreText;
-				
+
 				Grid.SetRow(border, 17);
 				Grid.SetColumn(border, 0);
 				parentGrid.Children.Add(border);
 			}
-			
+
 			string currentGlobalTotal = GetCellValue(parentGrid, 18, 0);
 			int globalTotal = int.Parse(currentGlobalTotal ?? "0");
-			
+
 			string upperTotalText = GetCellValue(parentGrid, 8, 0);
 			int upperFinalTotal = int.Parse(upperTotalText ?? "0");
-			
+
 			string lowerTotalText = GetCellValue(parentGrid, 17, 0);
 			int lowerFinalTotal = int.Parse(lowerTotalText ?? "0");
-			
+
 			globalTotal = upperFinalTotal + lowerFinalTotal;
-			
+
 			RemoveCellContent(parentGrid, 18, 0);
 
 			Border borderTotal = new Border
@@ -621,7 +645,7 @@ public partial class MainWindow : Window
 				Margin = new Thickness(2)
 			};
 			borderTotal.Child = updatedTotalText;
-				
+
 			Grid.SetRow(borderTotal, 18);
 			Grid.SetColumn(borderTotal, 0);
 			parentGrid.Children.Add(borderTotal);
@@ -629,6 +653,8 @@ public partial class MainWindow : Window
 			Grid.SetRow(scoreText, row);
 			Grid.SetColumn(scoreText, column);
 			parentGrid.Children.Add(scoreText);
+
+			BotTurn();
 		}
 	}
 
@@ -662,7 +688,7 @@ public partial class MainWindow : Window
 
 		return null;
 	}
-	
+
 	private void RemoveCellContent(Grid grid, int row, int column)
 	{
 		UIElement elementToRemove = null;
@@ -681,5 +707,4 @@ public partial class MainWindow : Window
 			grid.Children.Remove(elementToRemove);
 		}
 	}
-
 }
