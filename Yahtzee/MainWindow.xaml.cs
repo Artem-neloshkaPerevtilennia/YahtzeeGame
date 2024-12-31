@@ -9,6 +9,7 @@ namespace Yahtzee;
 public partial class MainWindow : Window
 {
 	private Grid leftYahtzeeGrid;
+	private Grid controlGrid;
 	private readonly Dictionary<Button, int> leftDice = new();
 	private readonly Dictionary<Button, int> rightDice = new();
 	private readonly Random random = new();
@@ -33,7 +34,7 @@ public partial class MainWindow : Window
 		mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 		mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-		Grid controlGrid = CreateControlGrid();
+		controlGrid = CreateControlGrid();
 		leftYahtzeeGrid = CreateYahtzeeGrid(true);
 		Grid rightYahtzeeGrid = CreateYahtzeeGrid(false);
 
@@ -70,35 +71,16 @@ public partial class MainWindow : Window
 			Background = new SolidColorBrush(Colors.LightGray)
 		};
 
-		controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
-		controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
 		controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-		Button exitButton = new Button
-		{
-			Content = "Exit Game",
-			Margin = new Thickness(5)
-		};
-
-		Button restartButton = new Button
-		{
-			Content = "Restart",
-			Margin = new Thickness(5)
-		};
 
 		ComboBox difficultyComboBox = new ComboBox
 		{
 			Margin = new Thickness(5),
-			ItemsSource = new[] { "Easy", "Medium", "Hard" },
+			ItemsSource = new[] { "Easy", "Hard" },
 			SelectedIndex = 0
 		};
+		Grid.SetColumn(difficultyComboBox, 0);
 
-		Grid.SetColumn(exitButton, 0);
-		Grid.SetColumn(restartButton, 1);
-		Grid.SetColumn(difficultyComboBox, 2);
-
-		controlGrid.Children.Add(exitButton);
-		controlGrid.Children.Add(restartButton);
 		controlGrid.Children.Add(difficultyComboBox);
 
 		return controlGrid;
@@ -657,7 +639,17 @@ public partial class MainWindow : Window
 			Grid.SetColumn(scoreText, column);
 			parentGrid.Children.Add(scoreText);
 
-			MiddleBotTurn();
+			if (controlGrid.Children[0] is ComboBox difficulty)
+			{
+				if (difficulty.Text == "Easy")
+				{
+					 EasyBotTurn();
+				}
+				else
+				{
+					MiddleBotTurn();
+				}
+			}
 		}
 	}
 
